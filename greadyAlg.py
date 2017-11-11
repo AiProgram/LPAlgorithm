@@ -9,6 +9,9 @@ from xlutils.copy import copy
 solFolder="D:\PythonProject\Essay\lp_files\\"
 outFolder="D:\PythonProject\Essay\sol_files\\"
 valFolder="D:\PythonProject\Essay\\val_files\\"#储存算法所需数据的val文件的文件夹
+colDict={'runningTime':1,'coverPOI':2,'coverValue':3,'sensorUsage':4}#excel表格中相应的行的字典
+lpMode={'slack_origin':1,'slack_single':2,'origin_single':3,'unknown':0}#自动识别是两种lp文件都有还是单独只有一种，与xls文件排版有关
+curMode=lpMode['unknown']
 #val文件中数据的顺序是pos,dis,v
 N_sensor= 0
 N_point= 0
@@ -31,6 +34,29 @@ coverValue=0
 totalValue=0
 timeUsed=0
 sensorUsage=0
+
+countFile=0
+os.chdir(solFolder)
+files=os.listdir()
+for f in files:
+    if os.path.isfile(f) and os.path.splitext(f)[1]==".lp":
+        xlsNamePre=os.path.splitext(f)[0]
+        countFile+=1
+        if os.path.splitext(f)[0]=="slack":#当发现线性规划文件时改变lp模式
+            if curMode==lpMode['unknown']:
+                curMode=lpMode['slack_single']
+            elif curMode==lpMode['origin_single']:
+                curMode=lp['slack_origin']
+        if os.path.splitext(f)[0]=='origin':#当发现整数规划文件时改变lp模式
+            if curMode==lpMode['unknown']:
+                curMode=lpMode['origin_single']
+            elif curMode==lpMode['slack_origin']:
+                curMode=lpMode['slack_origin']
+if curMode==lpMode['slack_origin']:
+    pairNum=int(countFile/2)
+else:
+    pairNum=int(countFile)
+
 def disCmp(x):
     """按照dis的大小顺排序"""
     return dis[x]
@@ -132,9 +158,20 @@ def getStat():
         if pointLeft[j]==False:
             coverPoint+=1
             coverValue+=v[j]
-def saveToXLS(f):
+def saveToXLS(f,t):
     xlsPrefix=os.path.splitext(f)[0]
-    xlsFileName="gready"+xlsPrefix+".xls"
+    xlsNameParts=xlsPrefix.split("_")
+    xlsFileName=xlsNameParts[0]+"_"+xlsNameParts[1]+"_"+xlsNameParts[2]+".xls"
+    blackStyle=xlwt.easyxf('font: color-index black, bold off')#数据储存的默认格式
+    oldWb=xlrd.open_workbook(outFolder+xlsFileName, formatting_info=True)#打开上一步中建立的xls文件
+    newWb=copy(oldWb)
+    newWs=newWb.get_sheet(0)
+    order=int(xlsPrefix.split("_")[3])
+    newWs.write(order+pairNum*2,colDict['runningTime'],t)
+    newWs.write(order+pairNum*2,colDict['coverPOI'],coverPoint,blackStyle)
+    newWs.write(order+pairNum*2,colDict['coverValue'],coverValue,blackStyle)
+    newWs.write(order+pairNum*2,colDict['sensorUsage'],sensorUsage,blackStyle)
+    newWb.save(outFolder+xlsFileName)
 
 if __name__=="__main__":
     os.chdir(valFolder)
@@ -146,7 +183,6 @@ if __name__=="__main__":
                 tStart=time.time()
                 readValFile(valFolder+f)
                 tStop=time.time()
-
                 print("-----------------------------------------------")
                 print(f)
                 print("覆盖价值/总价值\n"+str(coverValue)+"/"+str(totalValue))
@@ -154,3 +190,4 @@ if __name__=="__main__":
                 print("使用数/传感器总数\n"+str(sensorUsage)+"/"+str(N_sensor))
                 print("运行时间\n"+str(tStop-tStart)+"s")
                 print("-----------------------------------------------")
+                saveToXLS(f,tStop-tStart)
