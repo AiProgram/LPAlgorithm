@@ -151,3 +151,4 @@ if __name__=="__main__":
                 print("覆盖数/POI总数\n"+str(coverPoint)+"/"+str(N_point))
                 print("使用数/传感器总数\n"+str(sensorUsage)+"/"+str(N_sensor))
                 print("运行时间\n"+str(tStop-tStart)+"s")
+                print("-----------------------------------------------")
