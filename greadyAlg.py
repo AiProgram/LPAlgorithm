@@ -132,8 +132,9 @@ def getStat():
         if pointLeft[j]==False:
             coverPoint+=1
             coverValue+=v[j]
-def saveToXLS():
-    pass
+def saveToXLS(f):
+    xlsPrefix=os.path.splitext(f)[0]
+    xlsFileName="gready"+xlsPrefix+".xls"
 
 if __name__=="__main__":
     os.chdir(valFolder)
@@ -145,6 +146,7 @@ if __name__=="__main__":
                 tStart=time.time()
                 readValFile(valFolder+f)
                 tStop=time.time()
+
                 print("-----------------------------------------------")
                 print(f)
                 print("覆盖价值/总价值\n"+str(coverValue)+"/"+str(totalValue))

@@ -5,8 +5,9 @@ import xlrd
 from xlutils.copy import copy
 solFolder="D:\PythonProject\Essay\lp_files\\"
 outFolder="D:\PythonProject\Essay\sol_files\\"
-
-
+lpMode={'slack_origin':1,'slack_single':2,'origin_single':3,'unknown':0}#自动识别是两种lp文件都有还是单独只有一种，与xls文件排版有关
+curMode=lpMode['unknown']
+xlsNamePre=""
 #为写入excel表格作准备
 colDict={'runningTime':1,'coverPOI':2,'coverValue':3,'sensorUsage':4}#excel表格中相应的行的字典
 countFile=0
@@ -14,7 +15,18 @@ os.chdir(solFolder)
 files=os.listdir()
 for f in files:
     if os.path.isfile(f) and os.path.splitext(f)[1]==".lp":
+        xlsNamePre=os.path.splitext(f)[0]
         countFile+=1
+        if os.path.splitext(f)[0]=="slack":#当发现线性规划文件时改变lp模式
+            if curMode==lpMode['unknown']:
+                curMode=lpMode['slack_single']
+            elif curMode==lpMode['origin_single']:
+                curMode=lp['slack_origin']
+        if os.path.splitext(f)[0]=='origin':#当发现整数规划文件时改变lp模式
+            if curMode==lpMode['unknown']:
+                curMode=lpMode['origin_single']
+            elif curMode==lpMode['slack_origin']:
+                curMode=lpMode['slack_origin']
 blackStyle=xlwt.easyxf('font: color-index black, bold off')
 redStyle=xlwt.easyxf('font: color-index red, bold off')
 greenStyle=xlwt.easyxf('font: color-index green, bold off')
@@ -27,13 +39,19 @@ ws.write(0,1,"runningTime",blackStyle)
 ws.write(0,2,"coverPOI",blackStyle)
 ws.write(0,3,"coverValue",blackStyle)
 ws.write(0,4,"sensorUsage",blackStyle)
-pairNum=int(countFile/2)
+pairNum=0
+if curMode==lpMode['slack_origin']:
+    pairNum=int(countFile/2)
+else:
+    pairNum=int(countFile)
+#对比信息无用不再填入
+#根据lp文件种类决定xls文件的排版
 for i in range(pairNum):
     order=i+1
-    ws.write(order,0,"origin_"+str(order),blueStyle)
+    ws.write(order,0,"origin_"+str(order),redStyle)
     ws.write(order+pairNum,0,"slack_"+str(order),greenStyle)
-    ws.write(order+2*pairNum,0,"compare_"+str(order),redStyle)
-nameParts=files[0].split("_")#默认文件夹中的文件都是一种规模的而且名字符合规范
+    ws.write(order+pairNum*2,0,"gready_"+str(order),blueStyle)
+nameParts=xlsNamePre.split("_")#默认文件夹中的文件都是一种规模的而且名字符合规范
 xlsName=nameParts[1]+"_"+nameParts[2]+"_"+nameParts[3]+".xls"
 
 def runGLPK(fileName):

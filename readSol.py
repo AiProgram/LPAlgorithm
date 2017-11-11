@@ -7,7 +7,9 @@ import xlrd
 from xlutils.copy import copy
 solFolder="D:\PythonProject\Essay\lp_files\\"
 outFolder="D:\PythonProject\Essay\sol_files\\"
-
+lpMode={'slack_origin':1,'slack_single':2,'origin_single':3,'unknown':0}#自动识别是两种lp文件都有还是单独只有一种，与xls文件排版有关
+curMode=lpMode['unknown']
+xlsNamePre=""
 #为写入excel表格作准备
 colDict={'runningTime':1,'coverPOI':2,'coverValue':3,'sensorUsage':4}#excel表格中相应的行的字典
 countFile=0
@@ -15,9 +17,23 @@ os.chdir(solFolder)
 files=os.listdir()
 for f in files:
     if os.path.isfile(f) and os.path.splitext(f)[1]==".lp":
+        xlsNamePre=os.path.splitext(f)[0]
         countFile+=1
-pairNum=int(countFile/2)
-nameParts=files[0].split("_")#默认文件夹中的文件都是一种规模的而且名字符合规范
+        if os.path.splitext(f)[0]=="slack":#当发现线性规划文件时改变lp模式
+            if curMode==lpMode['unknown']:
+                curMode=lpMode['slack_single']
+            elif curMode==lpMode['origin_single']:
+                curMode=lp['slack_origin']
+        if os.path.splitext(f)[0]=='origin':#当发现整数规划文件时改变lp模式
+            if curMode==lpMode['unknown']:
+                curMode=lpMode['origin_single']
+            elif curMode==lpMode['slack_origin']:
+                curMode=lpMode['slack_origin']
+if curMode==lpMode['slack_origin']:
+    pairNum=int(countFile/2)
+else:
+    pairNum=int(countFile)
+nameParts=xlsNamePre.split("_")#默认文件夹中的文件都是一种规模的而且名字符合规范
 xlsName=nameParts[1]+"_"+nameParts[2]+"_"+nameParts[3]+".xls"
 blackStyle=xlwt.easyxf('font: color-index black, bold off')#数据储存的默认格式
 oldWb=xlrd.open_workbook(outFolder+xlsName, formatting_info=True)#打开上一步中建立的xls文件
@@ -180,4 +196,4 @@ if __name__ == "__main__":
                 print("------------------------------------------------------\n")
                 
     newWb.save(outFolder+xlsName)
-    compare()
+#    compare()#对比信息不再填入
