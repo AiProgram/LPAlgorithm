@@ -17,15 +17,15 @@ for f in files:
     if os.path.isfile(f) and os.path.splitext(f)[1]==".lp":
         xlsNamePre=os.path.splitext(f)[0]
         countFile+=1
-        if os.path.splitext(f)[0]=="slack":#当发现线性规划文件时改变lp模式
+        if os.path.splitext(f)[0].split("_")[0]=="slack":#当发现线性规划文件时改变lp模式
             if curMode==lpMode['unknown']:
                 curMode=lpMode['slack_single']
             elif curMode==lpMode['origin_single']:
-                curMode=lp['slack_origin']
-        if os.path.splitext(f)[0]=='origin':#当发现整数规划文件时改变lp模式
+                curMode=lpMode['slack_origin']
+        if os.path.splitext(f)[0].split("_")[0]=="origin":#当发现整数规划文件时改变lp模式
             if curMode==lpMode['unknown']:
                 curMode=lpMode['origin_single']
-            elif curMode==lpMode['slack_origin']:
+            elif curMode==lpMode['slack_single']:
                 curMode=lpMode['slack_origin']
 blackStyle=xlwt.easyxf('font: color-index black, bold off')
 redStyle=xlwt.easyxf('font: color-index red, bold off')
@@ -80,7 +80,6 @@ def testGLPK():
             result=runGLPK(rawName)
             count+=1
             writeInfo(file,result)
-            print("已经运行了"+str(count)+"个lp文件")
 def writeInfo(file,result):
     """用于记录下所耗费时间等信息"""
     os.chdir("D:\PythonProject\Essay\lp_files\\")

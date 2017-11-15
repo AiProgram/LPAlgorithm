@@ -42,12 +42,12 @@ for f in files:
     if os.path.isfile(f) and os.path.splitext(f)[1]==".lp":
         xlsNamePre=os.path.splitext(f)[0]
         countFile+=1
-        if os.path.splitext(f)[0]=="slack":#当发现线性规划文件时改变lp模式
+        if os.path.splitext(f)[0].split("_")[0]=="slack":#当发现线性规划文件时改变lp模式
             if curMode==lpMode['unknown']:
                 curMode=lpMode['slack_single']
             elif curMode==lpMode['origin_single']:
-                curMode=lp['slack_origin']
-        if os.path.splitext(f)[0]=='origin':#当发现整数规划文件时改变lp模式
+                curMode=lpMode['slack_origin']
+        if os.path.splitext(f)[0].split("_")[0]=='origin':#当发现整数规划文件时改变lp模式
             if curMode==lpMode['unknown']:
                 curMode=lpMode['origin_single']
             elif curMode==lpMode['slack_origin']:
@@ -131,7 +131,6 @@ def readValFile(valFile):
     for i in range(N_sensor):
         sensorLeft.append(i)
     sensorLeft=sorted(sensorLeft,key=disCmp,reverse=True)#自定义按照dis的顺序排序
-    print(sensorLeft)
     sLeftNum=N_sensor
     curMaxV=0
     leftBound.clear()
@@ -183,11 +182,11 @@ if __name__=="__main__":
                 tStart=time.time()
                 readValFile(valFolder+f)
                 tStop=time.time()
-                print("-----------------------------------------------")
+#                print("-----------------------------------------------")
                 print(f)
-                print("覆盖价值/总价值\n"+str(coverValue)+"/"+str(totalValue))
-                print("覆盖数/POI总数\n"+str(coverPoint)+"/"+str(N_point))
-                print("使用数/传感器总数\n"+str(sensorUsage)+"/"+str(N_sensor))
-                print("运行时间\n"+str(tStop-tStart)+"s")
-                print("-----------------------------------------------")
+#                print("覆盖价值/总价值\n"+str(coverValue)+"/"+str(totalValue))
+#                print("覆盖数/POI总数\n"+str(coverPoint)+"/"+str(N_point))
+#                print("使用数/传感器总数\n"+str(sensorUsage)+"/"+str(N_sensor))
+#                print("运行时间\n"+str(tStop-tStart)+"s")
+#                print("-----------------------------------------------")
                 saveToXLS(f,tStop-tStart)
