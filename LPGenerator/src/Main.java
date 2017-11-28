@@ -1,7 +1,6 @@
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.rmi.server.ExportException;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -12,9 +11,9 @@ public class Main {
     static String nextLine = "\r\n";
     static int ROUND = 1;//由于要生成很多个相同规模的lp，所以用来区分相同规模
     static int LEN = 10000;
-    static int N_sensor = 200;
-    static int N_point = 1000;
-    static int pairNum = 5;
+    static int N_sensor = 160;
+    static int N_point = 800;
+    static int pairNum = 20;
     static double PORTION = 0.6;
     static int Std_Check_Num = 5;
     static double Std_Check_Dis = (LEN / N_sensor) / 2 * PORTION;
@@ -141,9 +140,7 @@ public class Main {
                 }
             }
             elemBuilder.delete(0, elemBuilder.length());//特别处理最后一个
-            if(type==origin)
             elemBuilder.append(" ").append("x_").append(indexOfij(n, N_point - 1)).append(" <= 1");
-            else elemBuilder.append(" ").append("x_").append(indexOfij(n, N_point - 1)).append(" = 1");
             if (curLen + elemBuilder.length() + 2 <= MAXLINELEN)
                 builder.append(elemBuilder);
             else
