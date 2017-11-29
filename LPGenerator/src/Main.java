@@ -259,14 +259,14 @@ public class Main {
         return i * N_point + j;
     }
 
-    public static void main(String args[]) {
-        for (int i = 1; i <= pairNum; i++) {
-            ROUND = i;
-            generateData();
-            saveValue();
-            writeLp(slack);
-            //writeLp(origin);
-            System.out.println("file" + ROUND + "finished");
-        }
-    }
+//    public static void main(String args[]) {
+//        for (int i = 1; i <= pairNum; i++) {
+//            ROUND = i;
+//            generateData();
+//            saveValue();
+//            writeLp(slack);
+//            //writeLp(origin);
+//            System.out.println("file" + ROUND + "finished");
+//        }
+//    }
 }
