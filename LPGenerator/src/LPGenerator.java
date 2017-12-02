@@ -8,7 +8,8 @@ public class LPGenerator {
     float a1[][],a2[][],a3[][];//小于、大于、等于
     float b1[],b2[],b3[];//小于、大于、等于
     float d1[],d2[];
-    String nextLine="\r\n";
+    private String nextLine="\r\n";
+    private String lpFolder="./lpFiles/";//默认目录
     final int maxLen=200;
     public enum ExpType{
         Maximize,Minmize
@@ -44,6 +45,18 @@ public class LPGenerator {
         b2=b2Mat;
         b3=b3Mat;
     }
+    private void checkFolder()//检查文件储存的目录是否存在,不存在就创建
+    {
+        try{
+            File folder=new File(lpFolder);
+            if(!folder.isDirectory())
+            {
+                folder.mkdir();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     private boolean checkMatrix()//检查系数矩阵等矩阵的形状是否正确
     {
         int i,j;
@@ -72,7 +85,7 @@ public class LPGenerator {
                 if (a3[i].length != varNum) return false;
             }
         }
-        if(d1.length!=varNum || d2.length!=varNum) return false;//检查变量范围矩阵形状
+        if((d1!=null && d1.length!=varNum) || (d2!=null && d2.length!=varNum)) return false;//检查变量范围矩阵形状
         return true;
     }
 
@@ -126,7 +139,7 @@ public class LPGenerator {
             {
                 if(a[n][i]==1)
                     elemBuilder.append(" x_").append(i).append(" +");//系数为1时系数省略
-                else elemBuilder.append(" ").append(a[n][1]).append(" x_").append(i).append(" +");
+                else elemBuilder.append(" ").append(a[n][i]).append(" x_").append(i).append(" +");
                 allZero=false;
             }
             if(curLen+elemBuilder.length()>maxLen)
@@ -143,11 +156,12 @@ public class LPGenerator {
         {
             if(a[n][i]==1)
                 elemBuilder.append(" x_").append(i);//系数为1时系数省略
-            else elemBuilder.append(" ").append(a[n][1]).append(" x_").append(i);
+            else elemBuilder.append(" ").append(a[n][i]).append(" x_").append(i);
             allZero=false;
         }
         System.out.println(allZero);
         if(allZero) return "";//当所有的系数均为0返回空式子
+        curCon++;
         switch (type)
         {
             case LessThan:elemBuilder.append(" <= ").append(b[n]);break;
@@ -163,7 +177,12 @@ public class LPGenerator {
     private String getVariable(int n)//获得各个变量
     {
         StringBuilder builder=new StringBuilder("");
-        builder.append(d1[n]).append(" <= x_").append(n).append(" <= ").append(d2[n]);
+        if(d1!=null)
+            builder.append(d1[n]).append(" <= ");
+        builder.append("x_").append(n);
+        if(d2!=null)
+            builder.append(" <= ").append(d2[n]);
+//        builder.append(d1[n]).append(" <= x_").append(n).append(" <= ").append(d2[n]);
         return builder.toString();
     }
     public void generateLPFile(String fileName)
@@ -181,7 +200,8 @@ public class LPGenerator {
         String tmp="";
         try
         {
-            File lpFile=new File(fileName+".lp");
+            checkFolder();
+            File lpFile=new File(lpFolder+fileName+".lp");
             if(!lpFile.exists())
                 lpFile.createNewFile();
             else{
@@ -230,9 +250,9 @@ public class LPGenerator {
                 }
             }//约束写入完成
             if(varType==VarType.INT)//准备写入变量范围
-                bwriter.write("Bounds"+nextLine);
-            else if(varType==VarType.FLOAT)
                 bwriter.write("Binaries"+nextLine);
+            else if(varType==VarType.FLOAT)
+                bwriter.write("Bounds"+nextLine);
             for(i=0;i<varNum;i++)
                 bwriter.write(getVariable(i)+nextLine);
             bwriter.write("End"+nextLine);//全部写入完毕
@@ -246,12 +266,12 @@ public class LPGenerator {
     public static void main(String args[])
     {
         LPGenerator lpGenerator=new LPGenerator();
-        float c[]={1,2};
-        float a[][]={{1,2}};
-        float b[]={10};
+        float c[]={3,2};
+        float a[][]={{1,2},{4,5}};
+        float b[]={10,20};
         float d1[]={0,0};
         float d2[]={10000,10000};
-        lpGenerator.setExpression(ExpType.Minmize,c);
+        lpGenerator.setExpression(ExpType.Maximize,c);
         lpGenerator.setConstraints(a,null,null,b,null,null);
         lpGenerator.setVariable(VarType.FLOAT,2,d1,d2);
         lpGenerator.generateLPFile("test");
