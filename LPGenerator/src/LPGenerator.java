@@ -132,7 +132,7 @@ public class LPGenerator {
             case MoreThan:a=a2;b=b2;break;
             case Equal:a=a3;b=b3;break;
         }
-        for(i=0;i<b.length-1;i++)
+        for(i=0;i<a[0].length-1;i++)
         {
             elemBuilder.delete(0,elemBuilder.length());
             if(a[n][i]!=0)//系数为0时该项消除
@@ -162,17 +162,35 @@ public class LPGenerator {
         System.out.println(allZero);
         if(allZero) return "";//当所有的系数均为0返回空式子
         curCon++;
+        //deal with the last '+' that might be useless
+        if(elemBuilder.length()>0&&elemBuilder.charAt(elemBuilder.length()-1)=='+')
+        {
+            elemBuilder.delete(elemBuilder.length()-1,elemBuilder.length());
+        }
+        if(builder.length()>0&&elemBuilder.length()==0&&builder.charAt(builder.length()-1)=='+')
+        {
+            builder.delete(builder.length()-1,builder.length());
+        }
         switch (type)
         {
             case LessThan:elemBuilder.append(" <= ").append(b[n]);break;
             case MoreThan:elemBuilder.append(" >= ").append(b[n]);break;
-            case Equal:elemBuilder.append(" == ").append(b[n]);break;
+            case Equal:elemBuilder.append(" = ").append(b[n]);break;
         }
 
         if(curLen+elemBuilder.length()>maxLen)
             builder.append(nextLine).append(elemBuilder);
         else builder.append(elemBuilder);
         return builder.toString();
+    }
+
+    private String checkConstraints(String con)
+    {
+        //symbol '+' along with negtive number can cause syntax problem
+         int index=0;
+         con=con.replace("+ -","- ");
+         con=con.replace("+\r\n -","\r\n - ");
+         return con;
     }
     private String getVariable(int n)//获得各个变量
     {
@@ -223,6 +241,7 @@ public class LPGenerator {
             for(i=0;i<a1.length;i++)
             {
                 tmp=getConstraints(i,compareType.LessThan);
+                tmp=checkConstraints(tmp);
                 if(tmp.length()>0)//空字符串表示该条约束无效
                 {
                     bwriter.write(tmp);
@@ -233,6 +252,7 @@ public class LPGenerator {
             for(i=0;i<a2.length;i++)
             {
                 tmp=getConstraints(i,compareType.MoreThan);
+                tmp=checkConstraints(tmp);
                 if(tmp.length()>0)
                 {
                     bwriter.write(tmp);
@@ -243,6 +263,7 @@ public class LPGenerator {
             for(i=0;i<a3.length;i++)
             {
                 tmp=getConstraints(i,compareType.Equal);
+                tmp=checkConstraints(tmp);
                 if(tmp.length()>0)
                 {
                     bwriter.write(tmp);
@@ -274,6 +295,6 @@ public class LPGenerator {
         lpGenerator.setExpression(ExpType.Maximize,c);
         lpGenerator.setConstraints(a,null,null,b,null,null);
         lpGenerator.setVariable(VarType.FLOAT,2,d1,d2);
-        lpGenerator.generateLPFile("test");
+        lpGenerator.generateLPFile("test2");
     }
 }
